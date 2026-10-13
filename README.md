@@ -248,6 +248,7 @@ En Jenkins debe estar configurado el workspace de Slack, el token del plugin Sla
 | Sonar decía `Not authorized` | El secreto de GitHub no se comparte con Jenkins | Se creó `sonarcloud-token` en Credentials y se inyecta como `SONAR_TOKEN` |
 | Selenium esperaba `.swagger-ui` | La clase aparece después del renderizado JavaScript | Se espera el elemento estable `#swagger-ui` |
 | JMeter mostraba `JMETER_JWT_TOKEN: parameter not set` | El JWT opcional estaba vacío y `set -u` detenía el script | El pipeline acepta el valor vacío y ejecuta carga anónima |
+| JMeter no podía escribir el informe HTML | Jenkins conservaba archivos de una ejecución anterior | El pipeline limpia `reports/jmeter/html` y `results.jtl` antes de iniciar |
 | JMeter aparecía como `skipped` | Selenium había fallado antes | Al corregir Selenium, JMeter puede ejecutarse |
 
 ## 11. Evidencias para la entrega 📸

@@ -158,6 +158,12 @@ pipeline {
                                 exit 1
                             fi
 
+                            # JMeter exige que la carpeta del informe HTML esté vacía.
+                            # Jenkins conserva el workspace entre ejecuciones, por eso
+                            # se eliminan únicamente estos reportes generados.
+                            rm -rf reports/jmeter/html
+                            rm -f reports/jmeter/results.jtl
+
                             if ! command -v jmeter >/dev/null 2>&1; then
                                 jmeter_dir=".tools/apache-jmeter-${JMETER_VERSION}"
                                 jmeter_archive=".tools/apache-jmeter-${JMETER_VERSION}.tgz"
