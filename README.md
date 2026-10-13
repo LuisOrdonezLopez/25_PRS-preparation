@@ -130,6 +130,15 @@ http://jenkins:8097
 
 El pipeline usa `127.0.0.1:8097` internamente para comprobar que la aplicación arrancó, pero el navegador remoto usa `SELENIUM_BASE_URL`. Si dejas `SELENIUM_REMOTE_URL` vacío, intentará usar Chrome dentro del contenedor Jenkins, que es la causa del error `Driver server process died prematurely` de tu log.
 
+Si vuelve a aparecer `ERR_CONNECTION_REFUSED`, comprueba que ambos contenedores estén realmente en `gi08-ci`:
+
+```bash
+docker network inspect gi08-ci
+docker run --rm --network gi08-ci curlimages/curl:8.10.1 http://jenkins:8097/swagger-ui/index.html
+```
+
+El segundo comando debe devolver HTML. Si falla, sustituye `jenkins` por el nombre real mostrado por `docker ps` y usa ese mismo nombre en `SELENIUM_BASE_URL`.
+
 ## 7. Evidencias que faltan hacer en la infraestructura real
 
 Desde este entorno no tengo acceso a tu instancia de Jenkins, servidor SonarQube, workspace de Slack ni a un navegador/JMeter instalado; por eso no puedo generar capturas auténticas ni afirmar métricas de una ejecución. Para completar la entrega:
