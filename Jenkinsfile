@@ -50,7 +50,7 @@ pipeline {
         stage('Compilar y pruebas unitarias') {
             steps {
                 dir("${env.PROJECT_DIR}") {
-                    sh 'mvn -B clean verify'
+                    sh 'mvn -B clean verify -DskipITs=true'
                 }
             }
             post {
@@ -110,7 +110,7 @@ pipeline {
                                 exit 1
                             fi
 
-                            mvn -B -Pselenium verify
+                            mvn -B -Pselenium verify -DskipITs=false
                         '''
                     }
                 }

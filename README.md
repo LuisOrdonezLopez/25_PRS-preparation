@@ -130,6 +130,8 @@ http://jenkins:8097
 
 El pipeline usa `127.0.0.1:8097` internamente para comprobar que la aplicación arrancó, pero el navegador remoto usa `SELENIUM_BASE_URL`. Si dejas `SELENIUM_REMOTE_URL` vacío, intentará usar Chrome dentro del contenedor Jenkins, que es la causa del error `Driver server process died prematurely` de tu log.
 
+Si el nombre `jenkins` no resuelve correctamente desde Chrome, usa directamente la IP asignada por `docker network inspect`. En tu red actual Jenkins tiene la IP `172.19.0.2`, así que puedes colocar temporalmente `http://172.19.0.2:8097` en `SELENIUM_BASE_URL`.
+
 Si vuelve a aparecer `ERR_CONNECTION_REFUSED`, comprueba que ambos contenedores estén realmente en `gi08-ci`:
 
 ```bash

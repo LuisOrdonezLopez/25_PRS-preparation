@@ -60,6 +60,10 @@
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-failsafe-plugin</artifactId>
 			<version>3.2.5</version>
+			<configuration>
+				<!-- Las pruebas Selenium solo deben correr con el perfil selenium. -->
+				<skipITs>true</skipITs>
+			</configuration>
 		</plugin>
 	</plugins></build>
 	<profiles>
@@ -70,6 +74,7 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<configuration>
+						<skipITs>false</skipITs>
 						<includes><include>**/*SeleniumIT.java</include></includes>
 					</configuration>
 					<executions>
