@@ -127,7 +127,7 @@ pipeline {
             post {
                 always {
                     junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/TEST-*.xml'
-                    archiveArtifacts allowEmptyArchive: true, artifacts: "${env.PROJECT_DIR}/reports/functional/**"
+                    archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/functional/**'
                 }
             }
         }
@@ -135,7 +135,7 @@ pipeline {
         stage('Pruebas de carga JMeter: Verde-Amarillo-Rojo') {
             steps {
                 dir("${env.PROJECT_DIR}") {
-                    withEnv(["JMETER_JWT_TOKEN=${params.JWT_TOKEN}"]) {
+                    withEnv(["JMETER_JWT_TOKEN=${params.JWT_TOKEN ?: ''}"]) {
                         sh '''
                             set -eu
                             mkdir -p reports/jmeter
@@ -159,7 +159,7 @@ pipeline {
 
                             jmeter -n -t performance/preparation-load.jmx \
                                 -JtargetHost=127.0.0.1 -JtargetPort="${APP_PORT}" \
-                                -JjwtToken="${JMETER_JWT_TOKEN}" \
+                                -JjwtToken="${JMETER_JWT_TOKEN:-}" \
                                 -l reports/jmeter/results.jtl \
                                 -e -o reports/jmeter/html
                         '''
@@ -168,7 +168,7 @@ pipeline {
             }
             post {
                 always {
-                    archiveArtifacts allowEmptyArchive: true, artifacts: "${env.PROJECT_DIR}/reports/jmeter/**"
+                    archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/jmeter/**'
                 }
             }
         }
