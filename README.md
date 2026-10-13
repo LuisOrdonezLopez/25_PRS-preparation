@@ -55,12 +55,13 @@ El pipeline detecta ambos casos automáticamente y usa `.` cuando `pom.xml` est�
 
 ## 3. SonarQube
 
-El stage `Análisis SonarQube` ejecuta `mvn sonar:sonar`, publica los binarios y usa `target/site/jacoco/jacoco.xml` para cobertura. Para que `Quality Gate` bloquee el build:
+El stage `Análisis SonarQube` ejecuta el plugin oficial con coordenadas completas (`org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar`), publica los binarios y usa `target/site/jacoco/jacoco.xml` para cobertura. Esto evita el error `No plugin found for prefix 'sonar'` en contenedores Jenkins nuevos. Para que el análisis se autentique y `Quality Gate` bloquee el build:
 
 1. En SonarQube crea/configura el proyecto con la key `gi08-preparationservice`.
-2. En `Administration > Configuration > Webhooks`, agrega `http://JENKINS_URL/sonarqube-webhook/`.
-3. Ejecuta el job con el parámetro `ENFORCE_SONAR_GATE=true`.
-4. Abre el proyecto en SonarQube y captura la pantalla con Quality Gate, Bugs, Vulnerabilities, Code Smells, Coverage y Duplications.
+2. En Jenkins entra a `Manage Jenkins > System > SonarQube servers`, abre la instalación llamada exactamente `SonarQube` y selecciona una credencial de tipo **Secret text** que contenga un token generado en SonarQube. Si no hay credencial seleccionada, el scanner puede fallar después con `Not authorized`.
+3. En `Administration > Configuration > Webhooks`, agrega `http://JENKINS_URL/sonarqube-webhook/`.
+4. Ejecuta el job con el parámetro `ENFORCE_SONAR_GATE=true`.
+5. Abre el proyecto en SonarQube y captura la pantalla con Quality Gate, Bugs, Vulnerabilities, Code Smells, Coverage y Duplications.
 
 No inventes los valores del informe: copia los números reales de esa ejecución. La interpretación mínima es: Quality Gate indica si cumple las reglas; Bugs/Vulnerabilities representan defectos y riesgos; Code Smells indica deuda técnica; Coverage indica qué parte de las pruebas cubre el código; Duplications muestra código repetido.
 
