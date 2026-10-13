@@ -1,0 +1,57 @@
+server:
+  port: ${PORT:8097}
+  netty:
+    connection-timeout: 5000          # ⚡ Timeout de conexión HTTP
+    idle-timeout: 30000               # ⚡ Timeout de inactividad
+    max-keep-alive-requests: 1000     # ⚡ Reutilizar conexiones HTTP
+
+spring:
+  application:
+    name: preparationservice-hexagonal
+
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:postgresql://ep-twilight-union-anirs64a-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require}
+    username: ${R2DBC_USERNAME:neondb_owner}
+    password: ${R2DBC_PASSWORD:npg_2tBJnZFT0OWR}
+    pool:
+      initial-size: 10
+      max-size: 50                    # ⚡ Pool grande para alta concurrencia
+      max-idle-time: 30m
+      max-acquire-time: 3s            # ⚡ Timeout para obtener conexión
+      max-life-time: 60m              # ⚡ Vida máxima de conexión
+      validation-query: SELECT 1      # ⚡ Validar conexión antes de usar
+
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+
+  codec:
+    max-in-memory-size: 20MB
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://lab.vallegrande.edu.pe/keycloak-security/realms/prs-realm
+          jwk-set-uri: https://lab.vallegrande.edu.pe/keycloak-security/realms/prs-realm/protocol/openid-connect/certs
+
+logging:
+  level:
+    io.r2dbc: WARN
+    org.springframework.r2dbc: WARN
+    reactor.netty: WARN
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+services:
+  requests:
+    url: ${REQUESTS_SERVICE_URL:http://localhost:8087}
+  tarifas:
+    url: ${TARIFAS_SERVICE_URL:http://localhost:8100}
