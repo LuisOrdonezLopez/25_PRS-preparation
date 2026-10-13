@@ -24,6 +24,8 @@ pipeline {
         PROJECT_DIR = '.'
         SLACK_CHANNEL = '#gi08-pipeline'
         SONAR_PROJECT_KEY = 'gi08-preparationservice'
+        SONAR_ORGANIZATION = 'luisordonezlopez'
+        SONAR_CLOUD_URL = 'https://sonarcloud.io'
         APP_PORT = '8097'
         APP_BASE_URL = 'http://127.0.0.1:8097'
     }
@@ -63,8 +65,10 @@ pipeline {
         stage('Análisis SonarQube') {
             steps {
                 dir("${env.PROJECT_DIR}") {
+                    // La instalación Jenkins puede conservar el nombre "SonarQube",
+                    // pero el análisis apunta explícitamente a SonarCloud.
                     withSonarQubeEnv('SonarQube') {
-                        sh 'mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar -Dsonar.projectKey="${SONAR_PROJECT_KEY}"'
+                        sh 'mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar -Dsonar.host.url="${SONAR_CLOUD_URL}" -Dsonar.organization="${SONAR_ORGANIZATION}" -Dsonar.projectKey="${SONAR_PROJECT_KEY}"'
                     }
                 }
             }
