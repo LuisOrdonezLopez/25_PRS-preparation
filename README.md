@@ -99,10 +99,10 @@ Comprueba las herramientas así:
 docker exec jenkins java -version
 docker exec jenkins mvn -version
 docker exec jenkins curl --version
-docker exec jenkins jmeter --version
+docker exec jenkins jmeter --version  # opcional: el pipeline puede descargarlo
 ```
 
-Si aparece `jmeter: not found`, JMeter todavía no está instalado en el contenedor de Jenkins. En ese caso hay que usar una imagen de Jenkins preparada con JMeter o instalarlo dentro de la imagen; no es un error del proyecto Java.
+Si `jmeter` no existe en el contenedor, el propio `Jenkinsfile` descarga Apache JMeter 5.6.3 en `.tools/` y lo reutiliza en las siguientes ejecuciones. Para ello Jenkins necesita tener `curl`, `tar` y salida a Internet. No es necesario reconstruir el contenedor solo por este motivo.
 
 ## 5. SonarCloud 🔐
 

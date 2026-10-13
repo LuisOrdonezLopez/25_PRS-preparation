@@ -26,6 +26,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'gi08-preparationservice'
         SONAR_ORGANIZATION = 'luisordonezlopez'
         SONAR_CLOUD_URL = 'https://sonarcloud.io'
+        JMETER_VERSION = '5.6.3'
         APP_PORT = '8097'
         APP_BASE_URL = 'http://127.0.0.1:8097'
     }
@@ -157,6 +158,20 @@ pipeline {
                                 exit 1
                             fi
 
+                            if ! command -v jmeter >/dev/null 2>&1; then
+                                jmeter_dir=".tools/apache-jmeter-${JMETER_VERSION}"
+                                jmeter_archive=".tools/apache-jmeter-${JMETER_VERSION}.tgz"
+                                if [ ! -x "${jmeter_dir}/bin/jmeter" ]; then
+                                    mkdir -p .tools
+                                    curl --fail --location --silent --show-error \
+                                        "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz" \
+                                        --output "${jmeter_archive}"
+                                    tar -xzf "${jmeter_archive}" -C .tools
+                                fi
+                                export PATH="$PWD/${jmeter_dir}/bin:$PATH"
+                            fi
+
+                            jmeter --version
                             jmeter -n -t performance/preparation-load.jmx \
                                 -JtargetHost=127.0.0.1 -JtargetPort="${APP_PORT}" \
                                 -JjwtToken="${JMETER_JWT_TOKEN:-}" \
