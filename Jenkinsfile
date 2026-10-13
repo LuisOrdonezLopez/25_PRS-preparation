@@ -14,6 +14,8 @@ pipeline {
     parameters {
         password(name: 'JWT_TOKEN', defaultValue: '', description: 'Opcional: token JWT para probar datos protegidos con JMeter.')
         booleanParam(name: 'ENFORCE_SONAR_GATE', defaultValue: false, description: 'Falla el pipeline si SonarQube rechaza el Quality Gate. Requiere webhook Jenkins.')
+        string(name: 'SELENIUM_REMOTE_URL', defaultValue: '', trim: true, description: 'URL opcional de Selenium Grid, por ejemplo http://selenium-chrome:4444/wd/hub. Vacío usa Chrome local.')
+        string(name: 'SELENIUM_BASE_URL', defaultValue: 'http://127.0.0.1:8097', trim: true, description: 'URL de la aplicación visible desde el navegador Selenium. En Docker remoto usa http://NOMBRE_JENKINS:8097.')
     }
 
     environment {
@@ -23,7 +25,7 @@ pipeline {
         SLACK_CHANNEL = '#gi08-pipeline'
         SONAR_PROJECT_KEY = 'gi08-preparationservice'
         APP_PORT = '8097'
-        SELENIUM_BASE_URL = 'http://127.0.0.1:8097'
+        APP_BASE_URL = 'http://127.0.0.1:8097'
     }
 
     stages {
@@ -53,7 +55,7 @@ pipeline {
             }
             post {
                 always {
-                    junit allowEmptyResults: true, testResults: "${env.PROJECT_DIR}/target/surefire-reports/*.xml"
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
                 }
             }
         }
@@ -82,35 +84,40 @@ pipeline {
         stage('Pruebas funcionales Selenium') {
             steps {
                 dir("${env.PROJECT_DIR}") {
-                    sh '''
-                        set -eu
-                        mkdir -p reports/functional
-                        nohup mvn -B spring-boot:run -DskipTests -Dspring-boot.run.profiles=pipeline \
-                            > reports/functional/application.log 2>&1 &
-                        app_pid=$!
-                        echo "$app_pid" > reports/functional/application.pid
-                        trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+                    withEnv([
+                        "SELENIUM_REMOTE_URL=${params.SELENIUM_REMOTE_URL ?: ''}",
+                        "SELENIUM_BASE_URL=${params.SELENIUM_BASE_URL ?: 'http://127.0.0.1:8097'}"
+                    ]) {
+                        sh '''
+                            set -eu
+                            mkdir -p reports/functional
+                            nohup mvn -B spring-boot:run -DskipTests -Dspring-boot.run.profiles=pipeline \
+                                > reports/functional/application.log 2>&1 &
+                            app_pid=$!
+                            echo "$app_pid" > reports/functional/application.pid
+                            trap 'kill "$app_pid" 2>/dev/null || true' EXIT
 
-                        ready=false
-                        for attempt in $(seq 1 30); do
-                            if curl --silent --fail "${SELENIUM_BASE_URL}/swagger-ui/index.html" > /dev/null; then
-                                ready=true
-                                break
+                            ready=false
+                            for attempt in $(seq 1 30); do
+                                if curl --silent --fail "${APP_BASE_URL}/swagger-ui/index.html" > /dev/null; then
+                                    ready=true
+                                    break
+                                fi
+                                sleep 2
+                            done
+                            if [ "$ready" != true ]; then
+                                cat reports/functional/application.log
+                                exit 1
                             fi
-                            sleep 2
-                        done
-                        if [ "$ready" != true ]; then
-                            cat reports/functional/application.log
-                            exit 1
-                        fi
 
-                        mvn -B -Pselenium verify
-                    '''
+                            mvn -B -Pselenium verify
+                        '''
+                    }
                 }
             }
             post {
                 always {
-                    junit allowEmptyResults: true, testResults: "${env.PROJECT_DIR}/target/failsafe-reports/*.xml"
+                    junit allowEmptyResults: true, testResults: '**/target/failsafe-reports/TEST-*.xml'
                     archiveArtifacts allowEmptyArchive: true, artifacts: "${env.PROJECT_DIR}/reports/functional/**"
                 }
             }
@@ -130,7 +137,7 @@ pipeline {
 
                             ready=false
                             for attempt in $(seq 1 30); do
-                                if curl --silent --fail "${SELENIUM_BASE_URL}/api-docs" > /dev/null; then
+                                if curl --silent --fail "${APP_BASE_URL}/api-docs" > /dev/null; then
                                     ready=true
                                     break
                                 fi

@@ -102,7 +102,33 @@ Con el servicio disponible en `http://localhost:8097`, Chrome instalado y `chrom
 mvn -B -Pselenium verify -Dselenium.baseUrl=http://localhost:8097
 ```
 
-Jenkins levanta automáticamente el servicio con `spring-boot.run.profiles=pipeline`, espera Swagger y luego ejecuta estas dos pruebas. Si aparece `SessionNotCreatedException`, instala/actualiza Chrome en el agente o usa un Selenium Grid definiendo `SELENIUM_REMOTE_URL`.
+Jenkins levanta automáticamente el servicio con `spring-boot.run.profiles=pipeline`, espera Swagger y luego ejecuta estas dos pruebas. Si aparece `SessionNotCreatedException`, usa el Selenium Grid de Docker siguiente.
+
+### Selenium en Docker — opción recomendada
+
+Como Jenkins está dentro de Docker, no dependas de que la imagen `jenkins/jenkins` tenga Chrome. Levanta un contenedor Selenium separado en la misma red:
+
+```bash
+docker network create gi08-ci
+docker network connect gi08-ci jenkins
+docker run -d --name selenium-chrome --network gi08-ci --shm-size=2g -p 4444:4444 selenium/standalone-chrome:4.25.0
+```
+
+Obtén el nombre del contenedor Jenkins con `docker ps`. Si la red ya existe, omite `docker network create`. Comprueba Selenium en `http://localhost:4444/status`; debe mostrar `ready: true`.
+
+En Jenkins ejecuta **Build with Parameters** y coloca en `SELENIUM_REMOTE_URL`:
+
+```text
+http://selenium-chrome:4444/wd/hub
+```
+
+En el parámetro `SELENIUM_BASE_URL` coloca la URL de la aplicación visible desde el contenedor Selenium. Si el nombre del contenedor Jenkins es `jenkins`, usa:
+
+```text
+http://jenkins:8097
+```
+
+El pipeline usa `127.0.0.1:8097` internamente para comprobar que la aplicación arrancó, pero el navegador remoto usa `SELENIUM_BASE_URL`. Si dejas `SELENIUM_REMOTE_URL` vacío, intentará usar Chrome dentro del contenedor Jenkins, que es la causa del error `Driver server process died prematurely` de tu log.
 
 ## 7. Evidencias que faltan hacer en la infraestructura real
 
