@@ -13,7 +13,7 @@ pipeline {
 
     parameters {
         password(name: 'JWT_TOKEN', defaultValue: '', description: 'Opcional: token JWT para probar datos protegidos con JMeter.')
-        booleanParam(name: 'ENFORCE_SONAR_GATE', defaultValue: false, description: 'Falla el pipeline si SonarQube rechaza el Quality Gate. Requiere webhook Jenkins.')
+        booleanParam(name: 'ENFORCE_SONAR_GATE', defaultValue: false, description: 'Opcional: evalúa el Quality Gate. Déjalo en false si no tienes webhook de SonarCloud.')
         string(name: 'SELENIUM_REMOTE_URL', defaultValue: '', trim: true, description: 'URL opcional de Selenium Grid, por ejemplo http://selenium-chrome:4444/wd/hub. Vacío usa Chrome local.')
         string(name: 'SELENIUM_BASE_URL', defaultValue: 'http://127.0.0.1:8097', trim: true, description: 'URL de la aplicación visible desde el navegador Selenium. En Docker remoto usa http://NOMBRE_JENKINS:8097.')
     }
@@ -68,7 +68,11 @@ pipeline {
                     // La instalación Jenkins puede conservar el nombre "SonarQube",
                     // pero el análisis apunta explícitamente a SonarCloud.
                     withSonarQubeEnv('SonarQube') {
-                        sh 'mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar -Dsonar.host.url="${SONAR_CLOUD_URL}" -Dsonar.organization="${SONAR_ORGANIZATION}" -Dsonar.projectKey="${SONAR_PROJECT_KEY}"'
+                        // La credencial nunca se escribe en el repositorio ni en la línea
+                        // de comandos; Jenkins la enmascara en la consola.
+                        withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                            sh 'mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:5.1.0.4751:sonar -Dsonar.host.url="${SONAR_CLOUD_URL}" -Dsonar.organization="${SONAR_ORGANIZATION}" -Dsonar.projectKey="${SONAR_PROJECT_KEY}"'
+                        }
                     }
                 }
             }

@@ -15,6 +15,19 @@ En Jenkins, entra a `Manage Jenkins > System > SonarQube servers` y conserva el 
 Server URL: https://sonarcloud.io
 ```
 
-Selecciona una credencial de tipo `Secret text` que contenga un token de SonarCloud con permiso para ejecutar análisis en el proyecto. El pipeline usa esa credencial mediante `withSonarQubeEnv('SonarQube')`.
+En `Manage Jenkins > Credentials > System > Global credentials`, crea una credencial de tipo `Secret text` con estos valores:
+
+```text
+ID: sonarcloud-token
+Secret: el token de SonarCloud
+```
+
+El `Jenkinsfile` inyecta esa credencial como `SONAR_TOKEN` durante el análisis. No pegues el token en el `Jenkinsfile`, `pom.xml`, `sonar-project.properties` ni en GitHub.
+
+Para generar el token en SonarCloud: menú de tu cuenta > `My Account` > `Security` > genera un nuevo token y cópialo inmediatamente. En el plan gratuito utiliza un **Personal Access Token (PAT)**; el usuario que lo genera debe tener permiso para ejecutar análisis en `gi08-preparationservice`.
+
+El token que está guardado como secreto de GitHub Actions puede funcionar porque el valor es el mismo, pero Jenkins no puede leer automáticamente los secretos de GitHub. Debes copiar su valor a la credencial de Jenkins o generar uno nuevo.
 
 El error `Failed to connect to localhost:9000` significa que Jenkins todavía tiene configurada una URL local. No se soluciona instalando otro contenedor: hay que cambiar la URL a `https://sonarcloud.io` y volver a ejecutar el pipeline.
+
+No necesitas webhook para que el análisis se ejecute. Deja `ENFORCE_SONAR_GATE=false`; así Jenkins continúa con Selenium y JMeter después de publicar el análisis. El webhook solo es necesario si quieres que `waitForQualityGate` bloquee el pipeline.
