@@ -17,7 +17,9 @@ pipeline {
     }
 
     environment {
-        PROJECT_DIR = ''
+        // El repositorio 25_PRS-preparation de GitHub tiene pom.xml en su raíz.
+        // El valor por defecto evita que Jenkins construya una ruta "null".
+        PROJECT_DIR = '.'
         SLACK_CHANNEL = '#gi08-pipeline'
         SONAR_PROJECT_KEY = 'gi08-preparationservice'
         APP_PORT = '8097'
@@ -29,9 +31,16 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    // Permite usar este Jenkinsfile tanto si el repo es la carpeta
-                    // 25_PRS-preparation como si el repo contiene esa carpeta.
-                    env.PROJECT_DIR = fileExists('pom.xml') ? '.' : '25_PRS-preparation'
+                    // También permite usar este Jenkinsfile desde un repositorio
+                    // padre que contenga la carpeta 25_PRS-preparation.
+                    if (!fileExists('pom.xml')) {
+                        if (fileExists('25_PRS-preparation/pom.xml')) {
+                            env.PROJECT_DIR = '25_PRS-preparation'
+                        } else {
+                            error 'No se encontró pom.xml en la raíz ni en 25_PRS-preparation/'
+                        }
+                    }
+                    echo "Proyecto Maven detectado en: ${env.PROJECT_DIR}"
                 }
             }
         }

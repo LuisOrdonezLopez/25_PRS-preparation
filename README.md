@@ -51,7 +51,7 @@ En Jenkins crea un job de tipo **Pipeline > Pipeline script from SCM**, seleccio
 - Si el repositorio contiene esta carpeta: usa `25_PRS-preparation/Jenkinsfile` como **Script Path**.
 - Si `25_PRS-preparation` es la raíz del repositorio: usa `Jenkinsfile`.
 
-El pipeline detecta ambos casos automáticamente. El canal ya está fijado en `#gi08-pipeline` en `Jenkinsfile`.
+El pipeline detecta ambos casos automáticamente y usa `.` cuando `pom.xml` está en la raíz. El canal ya está fijado en `#gi08-pipeline` en `Jenkinsfile`.
 
 ## 3. SonarQube
 
