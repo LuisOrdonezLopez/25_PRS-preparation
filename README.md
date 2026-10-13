@@ -31,10 +31,18 @@ Jenkins no necesita que el código sea público si tiene credenciales para clona
 Instala/configura en Jenkins:
 
 1. Plugins: **Pipeline**, **Git**, **JUnit**, **SonarQube Scanner**, **Slack Notification** y **HTML Publisher** (este último es opcional para visualizar el informe HTML de JMeter).
-2. Herramientas del agente Linux: JDK 17, Maven 3.9+, Google Chrome/Chromium, ChromeDriver administrado por Selenium Manager y Apache JMeter 5.6+ en el `PATH`.
+2. Herramientas del nodo que ejecutará el job: JDK 17, Maven 3.9+, Google Chrome/Chromium, ChromeDriver administrado por Selenium Manager y Apache JMeter 5.6+ en el `PATH`.
 3. En `Manage Jenkins > System > SonarQube servers`, registra un servidor con el nombre exacto `SonarQube`, su URL y un token de análisis.
 4. En `Manage Jenkins > System > Slack`, configura el workspace y una credencial de tipo **Secret text** para el plugin Slack. Invita la aplicación/bot de Jenkins al canal `#gi08-pipeline`.
 5. El agente debe tener `curl`. El pipeline usa el perfil H2 para poder levantar el microservicio sin depender de PostgreSQL, Keycloak ni los microservicios externos.
+
+### Si Jenkins se queda en “Still waiting to schedule task”
+
+El pipeline usa `agent any`, por lo que debe ejecutarse en el nodo integrado de tu contenedor. El mensaje `Jenkins doesn't have label 'linux'` significa que el Jenkinsfile anterior solicitaba un label que no existe en tu instalación; no es un error del código ni de Git.
+
+Después de actualizar el repositorio, pulsa `Scan Multibranch Pipeline Now` o vuelve a ejecutar el job. Si prefieres conservar `agent { label 'linux' }`, entra a `Manage Jenkins > Nodes`, abre el nodo que ejecuta los builds y agrega exactamente el label `linux`.
+
+Importante: `agent any` solo resuelve la programación. Si el siguiente error dice `mvn: not found`, `jmeter: not found` o no encuentra Chrome, debes instalar esas herramientas dentro del contenedor/nodo que ejecuta el pipeline o conectar un agente Docker/Linux preparado con ellas. El contenedor de Jenkins por defecto normalmente solo trae Jenkins y Java.
 
 ### Crear el job
 

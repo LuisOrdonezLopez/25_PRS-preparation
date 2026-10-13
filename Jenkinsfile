@@ -1,5 +1,8 @@
 pipeline {
-    agent { label 'linux' }
+    // Usa el nodo disponible (en tu Docker aparece como "Jenkins").
+    // Si creas un agente separado con label linux, puedes volver a usar:
+    // agent { label 'linux' }
+    agent any
 
     options {
         skipDefaultCheckout(true)
