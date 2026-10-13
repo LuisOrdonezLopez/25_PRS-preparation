@@ -31,3 +31,12 @@ El token que está guardado como secreto de GitHub Actions puede funcionar porqu
 El error `Failed to connect to localhost:9000` significa que Jenkins todavía tiene configurada una URL local. No se soluciona instalando otro contenedor: hay que cambiar la URL a `https://sonarcloud.io` y volver a ejecutar el pipeline.
 
 No necesitas webhook para que el análisis se ejecute. Deja `ENFORCE_SONAR_GATE=false`; así Jenkins continúa con Selenium y JMeter después de publicar el análisis. El webhook solo es necesario si quieres que `waitForQualityGate` bloquee el pipeline.
+
+Para Selenium remoto, en `Build with Parameters` usa:
+
+```text
+SELENIUM_REMOTE_URL=http://selenium-chrome:4444/wd/hub
+SELENIUM_BASE_URL=http://jenkins:8097
+```
+
+En esta red Docker, `jenkins` es el nombre del contenedor de Jenkins. No uses `127.0.0.1` para el navegador remoto: allí apuntaría al contenedor `selenium-chrome`, no al servicio Spring Boot.

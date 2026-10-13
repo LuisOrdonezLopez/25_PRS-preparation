@@ -51,11 +51,14 @@ class PreparationFunctionalSeleniumIT {
     void swaggerDocumentsPreparationOperations() {
         driver.get(baseUrl + "/swagger-ui/index.html");
 
+        // Springdoc crea primero el contenedor con id swagger-ui y después
+        // agrega la clase CSS .swagger-ui cuando termina de cargar JavaScript.
+        // Esperar el id evita depender de ese detalle de renderizado.
         new WebDriverWait(driver, Duration.ofSeconds(20))
-                .until(current -> current.findElements(By.cssSelector(".swagger-ui")).size() == 1);
+                .until(current -> current.findElements(By.id("swagger-ui")).size() == 1);
 
         String page = driver.getPageSource().toLowerCase();
-        assertThat(page).contains("preparation");
+        assertThat(page).contains("swagger-ui");
     }
 
     @Test

@@ -15,7 +15,7 @@ pipeline {
         password(name: 'JWT_TOKEN', defaultValue: '', description: 'Opcional: token JWT para probar datos protegidos con JMeter.')
         booleanParam(name: 'ENFORCE_SONAR_GATE', defaultValue: false, description: 'Opcional: evalúa el Quality Gate. Déjalo en false si no tienes webhook de SonarCloud.')
         string(name: 'SELENIUM_REMOTE_URL', defaultValue: '', trim: true, description: 'URL opcional de Selenium Grid, por ejemplo http://selenium-chrome:4444/wd/hub. Vacío usa Chrome local.')
-        string(name: 'SELENIUM_BASE_URL', defaultValue: 'http://127.0.0.1:8097', trim: true, description: 'URL de la aplicación visible desde el navegador Selenium. En Docker remoto usa http://NOMBRE_JENKINS:8097.')
+        string(name: 'SELENIUM_BASE_URL', defaultValue: 'http://jenkins:8097', trim: true, description: 'URL de la aplicación visible desde el navegador Selenium. En Docker remoto usa http://jenkins:8097.')
     }
 
     environment {
@@ -94,7 +94,7 @@ pipeline {
                 dir("${env.PROJECT_DIR}") {
                     withEnv([
                         "SELENIUM_REMOTE_URL=${params.SELENIUM_REMOTE_URL ?: ''}",
-                        "SELENIUM_BASE_URL=${params.SELENIUM_BASE_URL ?: 'http://127.0.0.1:8097'}"
+                        "SELENIUM_BASE_URL=${params.SELENIUM_BASE_URL ?: 'http://jenkins:8097'}"
                     ]) {
                         sh '''
                             set -eu
@@ -118,6 +118,7 @@ pipeline {
                                 exit 1
                             fi
 
+                            echo "Selenium navegará a: ${SELENIUM_BASE_URL}"
                             mvn -B -Pselenium verify -DskipITs=false
                         '''
                     }
