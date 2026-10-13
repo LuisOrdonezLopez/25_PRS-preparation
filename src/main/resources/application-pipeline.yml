@@ -1,0 +1,31 @@
+server:
+  port: ${PORT:8097}
+
+spring:
+  application:
+    name: preparationservice-pipeline
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:h2:mem:///pipeline;DB_CLOSE_DELAY=-1}
+    username: ${R2DBC_USERNAME:sa}
+    password: ${R2DBC_PASSWORD:}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/schema-pipeline.sql
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://127.0.0.1:9999/does-not-exist}
+
+services:
+  requests:
+    url: ${REQUESTS_SERVICE_URL:http://127.0.0.1:8098}
+  tarifas:
+    url: ${TARIFAS_SERVICE_URL:http://127.0.0.1:8099}
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

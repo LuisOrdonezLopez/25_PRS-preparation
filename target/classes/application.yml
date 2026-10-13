@@ -10,9 +10,9 @@ spring:
     name: preparationservice-hexagonal
 
   r2dbc:
-    url: ${R2DBC_URL:r2dbc:postgresql://ep-twilight-union-anirs64a-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require}
+    url: ${R2DBC_URL:r2dbc:postgresql://localhost:5432/neondb}
     username: ${R2DBC_USERNAME:neondb_owner}
-    password: ${R2DBC_PASSWORD:npg_2tBJnZFT0OWR}
+    password: ${R2DBC_PASSWORD:}
     pool:
       initial-size: 10
       max-size: 50                    # ⚡ Pool grande para alta concurrencia

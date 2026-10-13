@@ -1,0 +1,6 @@
+target/
+reports/
+*.log
+*.pid
+.idea/
+.vscode/
